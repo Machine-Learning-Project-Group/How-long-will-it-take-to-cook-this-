@@ -46,7 +46,7 @@ def predict_1R(test_file, model):
             prediction.append(model[steps])
         
         else:
-            prediction.append(3)
+            prediction.append(2)
     
     test['1R_predicted'] = prediction
     test.to_csv(test_file)
