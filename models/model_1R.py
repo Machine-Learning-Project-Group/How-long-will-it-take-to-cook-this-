@@ -16,7 +16,7 @@ def n_1R(train_file, rule="steps"):
         print("Invalid rule! Please choose from ['steps', 'ingredients']")
         return 0
     
-    print("predicting using '{rule}'")
+    print(f"training on {train_file} using rule: '{rule}'")
     
     y = train['duration_label']
     
@@ -34,7 +34,8 @@ def n_1R(train_file, rule="steps"):
     matrix['predict'] = predict
     return matrix['predict']
 
-def predict_1R(test_file, model):
+
+def predict_1R(test_file, model, name='1R_prediction'):
     """Predicts the labels from the given file & 1R model"""
     test = pd.read_csv(test_file, header=0)
     
@@ -48,5 +49,6 @@ def predict_1R(test_file, model):
         else:
             prediction.append(2)
     
-    test['1R_predicted'] = prediction
-    test.to_csv(test_file)
+    test[name] = prediction
+    print(f"predicted {test_file}, saved to column '{name}'")
+    test.to_csv(test_file, index=False)
