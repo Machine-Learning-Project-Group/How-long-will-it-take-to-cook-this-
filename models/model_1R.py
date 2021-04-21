@@ -1,13 +1,23 @@
 import numpy as np
 import pandas as pd
 
-def n_steps1R(train_file):
-    """Trains on the given csv file,
+def n_1R(train_file, rule="steps"):
+    """Trains on the given csv file, based on the given rule (steps or ingredients)
     Returns the learned 1R model in the form of a dataframe,
-    n_steps: most possible label"""
+    rule_value: most possible label"""
     
-    train = pd.read_csv(train_file, header=0).loc[:, ['n_steps', 'duration_label']]
-    X = train['n_steps']
+    train = pd.read_csv(train_file, header=0).loc[:, ['n_steps', 'n_ingredients', 'duration_label']]
+    
+    if rule == "steps":
+        print("predicting using steps")
+        X = train['n_steps']
+    elif rule == "ingredients":
+        print('predicting using ingredients')
+        X = train['n_ingredients']
+    else:
+        print("Invalid rule! Please choose from ['steps', 'ingredients']")
+        return 0
+
     y = train['duration_label']
     
     # count frequency of each n_steps in each duration label
