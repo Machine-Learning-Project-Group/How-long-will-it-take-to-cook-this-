@@ -6,14 +6,16 @@ def n_1R(train_file, rule="steps"):
     Returns the learned 1R model in the form of a dataframe,
     rule_value: most possible label"""
     
-    train = pd.read_csv(train_file, header=0).loc[:, ['n_steps', 'n_ingredients', 'duration_label']]
-    
+    train = pd.read_csv(train_file, header=0)
+
     if rule == "steps":
         X = train['n_steps']
     elif rule == "ingredients":
         X = train['n_ingredients']
+    elif rule == "verbs":
+        X = train['n_verbs']
     else:
-        print("Invalid rule! Please choose from ['steps', 'ingredients']")
+        print("Invalid rule! Please choose from ['steps', 'ingredients', 'verbs']")
         return 0
     
     print(f"training on {train_file} using rule: '{rule}'")
@@ -35,16 +37,22 @@ def n_1R(train_file, rule="steps"):
     return matrix['predict']
 
 
-def predict_1R(test_file, model, name='1R_prediction'):
+def predict_1R(test_file, model, rule='steps', name='1R_prediction'):
     """Predicts the labels from the given file & 1R model"""
     test = pd.read_csv(test_file, header=0)
     
     prediction = []
     for index, row in test.iterrows():
-        steps = row['n_steps']
         
-        if steps in model.index:
-            prediction.append(model[steps])
+        if rule == 'steps':
+            X = row['n_steps']
+        elif rule == 'ingredients':
+            X = row['n_ingredients']
+        elif rule == 'verbs':
+            X = row['n_verbs']
+        
+        if X in model.index:
+            prediction.append(model[X])
         
         else:
             prediction.append(2)
