@@ -1,62 +1,64 @@
 import numpy as np
 import pandas as pd
 
-def n_1R(train_file, rule="steps"):
-    """Trains on the given csv file, based on the given rule (steps or ingredients)
-    Returns the learned 1R model in the form of a dataframe,
-    rule_value: most possible label"""
+def train_1R(train_file, features):
+    """Trains on the given csv file, based on the given features
+    Returns the learned 1R model in the form dict of dict,
+    feature: prediction_rule"""
     
     train = pd.read_csv(train_file, header=0)
 
-    if rule == "steps":
-        X = train['n_steps']
-    elif rule == "ingredients":
-        X = train['n_ingredients']
-    elif rule == "verbs":
-        X = train['n_verbs']
-    else:
-        print("Invalid rule! Please choose from ['steps', 'ingredients', 'verbs']")
-        return 0
-    
-    print(f"training on {train_file} using rule: '{rule}'")
+    # double check given features
+    features = [f for f in features if f in train.columns]
+    print(f"Training 1R model on: {features}\n")
     
     y = train['duration_label']
+    model = {}
     
-    # count frequency of each n_steps in each duration label
-    matrix = pd.DataFrame(index=set(X), columns=[1, 2, 3]).fillna(0)
-    for i in range(len(X)):
-        matrix.loc[X[i], y[i]] += 1
-    
-    # calculate the most frequent label in each n_step, save to list
-    predict = []
-    for index, a in matrix.iterrows():
-        predict.append([i for i, j in enumerate(a) if j == max(a)][0] + 1)
-    
-    # save prediction & return
-    matrix['predict'] = predict
-    return matrix['predict']
+    for feature in features:
+        
+        X = train[feature]
+        
+        # count frequency of each n_steps in each duration label
+        matrix = pd.DataFrame(index=set(X), columns=[1, 2, 3]).fillna(0)
+        for i in range(len(X)):
+            matrix.loc[X[i], y[i]] += 1
 
+        # calculate the most frequent label in each n_step, save to list
+        predict = {}
+        for index, a in matrix.iterrows():
 
-def predict_1R(test_file, model, rule='steps', name='1R_prediction'):
+            predict[index] = [i for i, j in enumerate(a) if j == max(a)][0] + 1
+
+        # save prediction to dictionary
+        model[feature] = predict
+
+    return model
+
+def predict_1R(test_file, model):
     """Predicts the labels from the given file & 1R model"""
+    
     test = pd.read_csv(test_file, header=0)
     
-    prediction = []
-    for index, row in test.iterrows():
+    for feature in model.keys():
         
-        if rule == 'steps':
-            X = row['n_steps']
-        elif rule == 'ingredients':
-            X = row['n_ingredients']
-        elif rule == 'verbs':
-            X = row['n_verbs']
-        
-        if X in model.index:
-            prediction.append(model[X])
+        if feature in test.columns:
+            
+            prediction = []
+            for index, row in test.iterrows():
+
+                X = row[feature]
+
+                if X in model[feature].keys():
+                    prediction.append(model[feature][X])
+
+                else:
+                    prediction.append(2)
+
+            test[(feature+"_1R_prediction")] = prediction
         
         else:
-            prediction.append(2)
+            print(f"Feature {feature} not found in the test file!")
     
-    test[name] = prediction
-    print(f"predicted {test_file}, saved to column '{name}'")
+    print(f"Predicted {test_file} with {list(model.keys())}\n")
     test.to_csv(test_file, index=False)

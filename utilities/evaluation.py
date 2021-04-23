@@ -23,7 +23,10 @@ def evaluate(predicted_file):
     for col in [col for col in predicted.columns if 'prediction' in col]:
         
         print(f"\nNow analyzing performance of '{col}'\n")
-
+        
+        accuracy = accuracy_score(predicted['duration_label'], predicted[col])
+        print(f"Accuracy = {(accuracy*100):.2f}%")
+        
         precision = precision_score(predicted['duration_label'], predicted[col], average=None, zero_division=0)
         recall = recall_score(predicted['duration_label'], predicted[col], average=None, zero_division=0)
         f1 = f1_score(predicted['duration_label'], predicted[col], average=None, zero_division=0)
