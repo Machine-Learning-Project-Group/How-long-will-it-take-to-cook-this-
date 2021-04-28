@@ -30,8 +30,8 @@ def extract_verb(file, output=None):
     data = pd.read_csv(file, header=0)
     
     # tokenize
-    data['verbs'] = data['steps'].apply(tokenizer.tokenize())
-    data['tok_ingredients'] = data['ingredients'].apply(tokenizer.tokenize())
+    data['verbs'] = data['steps'].apply(lambda steps: tokenizer.tokenize(steps))
+    data['tok_ingredients'] = data['ingredients'].apply(lambda ing: tokenizer.tokenize(ing))
     print("\rProgress: + - - - -", end='')
     
     # lemmatization
