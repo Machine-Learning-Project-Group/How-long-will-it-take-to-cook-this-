@@ -50,7 +50,7 @@ def verb_vec(train_file, test_file, pca_num=50):
     train = pd.merge(train, X_train, left_index=True, right_index=True)
     test = pd.merge(test, X_test, left_index=True, right_index=True)
     
-    print(f"Created {pca_num} verb vectors feaatures")
+    print(f"Created {pca_num} verb vectors features")
     
     train.to_csv(train_file, index=False)
     test.to_csv(test_file, index=False)
