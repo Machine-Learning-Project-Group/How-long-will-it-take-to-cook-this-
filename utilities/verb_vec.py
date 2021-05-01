@@ -18,7 +18,7 @@ def word_count(data, words):
                 counts.loc[index, verb] +=1
     return counts
 
-def verb_vec(train_file, test_file, pca_num=50):
+def verb_vec(train_file, test_file, threshold=80, pca_num=100, merge=False):
     """
     converts verb list into numberical vectors using word count & PCA,
     pca_num: number of principal components"""
@@ -36,6 +36,15 @@ def verb_vec(train_file, test_file, pca_num=50):
     # construct word count matrix
     train_count = word_count(train['verbs'], words)
     test_count = word_count(test['verbs'], words)
+    
+    # drop rare words
+    drop = [col for col, val in train_count.sum().iteritems() if val <= threshold]
+    train_count.drop(drop, axis=1, inplace=True)
+    test_count.drop(drop, axis=1, inplace=True)
+    
+    if merge:
+        train = pd.merge(train, train_count, left_index=True, right_index=True)
+        test = pd.merge(test, test_count, left_index=True, right_index=True)
     
     # apply pca to word count
     pca = decomposition.PCA(n_components=pca_num)

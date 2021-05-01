@@ -1,10 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import recall_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, confusion_matrix
 
 def simple_accuracy(predicted_file):
     """calls sklearn for simple accuracy calculation on the given file"""
