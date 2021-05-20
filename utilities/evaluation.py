@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from itertools import combinations
+import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, confusion_matrix
 
 def evaluate(yhat, y):
@@ -19,3 +21,76 @@ def evaluate(yhat, y):
     matrix = pd.DataFrame(matrix, index=[1,2,3], columns=[1,2,3])
     print("\nConfusion matrix:")
     print(matrix, end='\n\n')
+    
+def proba_2_pred(probas):
+    """
+    Convert dataframe of probabilities into dataframe of prediction
+    probas: dataframe in the form [model 1 label 1 probability], [model 2 label 2 probability], ... [model n label n probability]
+    """
+    length = probas.values.shape[1]
+    out = pd.DataFrame(range(probas.shape[0]))
+
+    for i in range(0, length, 3):
+        proba = X_t.iloc[:, i:i+3]
+        yhat = pd.Series(np.argmax(proba.values, axis=1)+1, name=f'{proba.columns[0][:-2]}')
+        out = pd.concat([out, yhat], axis=1)
+
+    out.drop(0, axis=1, inplace=True)
+    return out
+
+def shared_error(pred_a, pred_b):
+    """
+    Visualize shared error between 2 predictions,
+    pred_a: a series of boolean value indicating model a performance
+    """
+    print(f"Model A accuracy : {pred_a.sum()/len(pred_a.index)}")
+    print(f"Model B accuracy : {pred_b.sum()/len(pred_b.index)}")
+
+    TT = TF = FF = 0
+
+    length = len(pred_a.index)
+
+    for i in range(length):
+        a = pred_a[i]
+        b = pred_b[i]
+        if a and b:
+            TT += 1
+        elif not (a or b):
+            FF += 1
+        else:
+            TF += 1
+
+    print(f"Out of all predictions made,")
+
+    # Pie chart
+    labels = 'Shared error', 'Theoritical improvement potential', 'Shared correct prediction'
+    sizes = [FF, TF, TT]
+    explode = (0.1, 0.1, 0.1)  # only "explode" the 2nd slice
+    colors = ['tomato', 'cyan', 'springgreen']
+
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, explode=explode, colors=colors, labels=labels, autopct='%1.1f%%', startangle=120)
+    ax1.axis('equal')
+
+    plt.show()
+    
+def evaluate_models(yhats, y, titles):
+    """
+    Evaluate performance of multiple models
+    
+    yhats: 2d array of predictions
+    y: array of true label
+    titles: list of model names
+    """
+    for yhat, title in zip(yhats, titles):
+        print(f"Evaluating {title}:")
+        score(yhat, y)
+        print("-"*50)
+    
+    if len(yhats) > 1:
+        length = len(yhats)
+        for comb in combinations(range(length), 2):
+            print(f"Evaluating {titles[0]} & {titles[1]}")
+            pred_a = pd.Series(a==y)
+            pred_b = pd.Series(b==y)
+            shared_error(pred_a, pred_b)
