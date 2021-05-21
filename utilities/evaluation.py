@@ -38,27 +38,27 @@ def proba_2_pred(probas):
     out.drop(0, axis=1, inplace=True)
     return out
 
-def shared_error(pred_a, pred_b, titles):
+def shared_error(pred_a, pred_b):
     """
     Visualize shared error between 2 predictions,
     pred_a: a series of boolean value indicating model a performance
     """
-    print(f"Model {titles[0]} accuracy : {pred_a.sum()/len(pred_a.index)}")
-    print(f"Model {titles[1]} accuracy : {pred_b.sum()/len(pred_b.index)}")
+    print(f"Model A accuracy : {pred_a.sum()/len(pred_a.index)}")
+    print(f"Model B accuracy : {pred_b.sum()/len(pred_b.index)}")
 
     TT = TF = FF = 0
 
     length = len(pred_a.index)
 
     for i in range(length):
-      a = pred_a.iloc[i]
-      b = pred_b.iloc[i]
-      if a and b:
-          TT += 1
-      elif not (a or b):
-          FF += 1
-      else:
-          TF += 1
+        a = pred_a[i]
+        b = pred_b[i]
+        if a and b:
+            TT += 1
+        elif not (a or b):
+            FF += 1
+        else:
+            TF += 1
 
     print(f"Out of all predictions made,")
 
@@ -84,20 +84,13 @@ def evaluate_models(yhats, y, titles):
     """
     for yhat, title in zip(yhats, titles):
         print(f"Evaluating {title}:")
-        evaluate(yhat, y)
+        score(yhat, y)
         print("-"*50)
     
     if len(yhats) > 1:
         length = len(yhats)
         for comb in combinations(range(length), 2):
-          a = comb[0]
-          b = comb[1]
-          names = [titles[a], titles[b]]
-          print(f"Evaluating {titles[a]} & {titles[b]}")
-          a = yhats[a]
-          b = yhats[b]
-
-          pred_a = pd.Series(a==y)
-          pred_b = pd.Series(b==y)
-          print("passing")
-          shared_error(pred_a, pred_b, names)
+            print(f"Evaluating {titles[0]} & {titles[1]}")
+            pred_a = pd.Series(a==y)
+            pred_b = pd.Series(b==y)
+            shared_error(pred_a, pred_b)
